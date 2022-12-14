@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="shortcut icon" href="../assets/Logo-FCFM.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/front/css/main.css">
+    <title>Carga de horas</title>
+</head>
+<body class="main-background">
+    <div class="container-fluid min-vh-100">
+
+        <header class="row position-fixed w-100" style="margin-bottom: 150px; z-index: 10;" >
+            <nav class="navbar navbar-expand-lg button-color col-lg-12 d-none d-lg-block">
+                
+                <a class="navbar-brand text-white" href="#">Registro FCFM</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon  text-white "></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarText">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active text-white " aria-current="page" href="#">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white " href="#">Solicitudes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white " href="#">Cerrar sesión</a>
+                    </li>
+                    </ul>
+                    <span class="navbar-text text-white ">
+                    Hola, Derek!
+                    </span>
+                </div>
+            </nav>
+        </header>
+        <main>
+            <div class="row justify-content-center mb-5 pt-lg-5">
+                <div class="col col-md-6 col-lg-6 col-xl-4 mt-lg-4">
+                    <h1 class="text-center my-5 display-4">Carga de horas</h1>
+                    <section class="clock-container" style="margin-bottom: 70px;">
+                        <div class="mx-3">
+                            <h2 class="border-1 fw-normal border-bottom pb-2 border-secondary mx-auto text-center mb-5" 
+                            style="font-size: 5em;">00:00</h2>
+                        </div>
+                        <div class="row justify-content-evenly mb-4 px-2">
+                            <div class="col text-end">
+                                <button class="btn ss-btn text-white w-100 mb-3">Empezar</button>
+                                <div class="text-start">
+                                    <div class="form-check d-inline-block">
+                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                            Reponer horas
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col text-start">
+                                <button class="btn btn-danger border-bottom-danger text-white w-100">Terminar</button>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="progress-dashboard  pb-5 pb-xl-0">
+                        <div class="row align-content-center my-2">
+                            <div class="col">
+                                <p class="ms-2 mb-0 fs-5">Último registro de horas</p>
+                            </div>
+                        </div>
+                        <div class="row justify-content-between align-items-center box-blue__background mx-1 text-white gx-0 rounded">
+                            <span class="col py-2 text-center">Fecha</span>
+                            <span class="col py-2 text-center">Hora inicio</span>
+                            <span class="col py-2 text-center">Hora final</span>
+                        </div>
+                        <div class="cards-container">
+                            <div class="hour-card row gx-0 mx-1 my-3 text-blue__color bg-white rounded">
+                                <span class="col p-2 text-center">12/01/2022</span>
+                                <span class="col p-2 text-center">12:00 p.m.</span>
+                                <span class="col p-2 text-center">4:00 p.m.</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+
+    <nav class="box-blue__background fixed-bottom text-white d-block d-lg-none">
+        <div class="row">
+            <div class="col text-center">
+                <button class="btn text-white fs-1 w-100 shadow-none">
+                    <i class="fa-solid fa-user"></i>
+                </button>
+            </div>
+            <div class="col text-center">
+                <button class="btn text-white fs-1 w-100 shadow-none">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+            <div class="col text-center">
+                <button class="btn text-white fs-1 w-100 shadow-none">
+                    <i class="fa-solid fa-chart-column"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+    <footer class="d-none d-lg-block">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 button-color d-flex justify-content-center align-items-center" style="height:80px">
+                    <h5 class="text-white text-center pt-3">Departamento de asesorias FCFM 2022  &copy</h5>
+                </div>   
+            </div>
+        </div>       
+   </footer>    
+</body>
+</html>

@@ -1,0 +1,68 @@
+.main-background{
+    background: rgb(217,217,217);
+    background: -moz-radial-gradient(circle, rgba(217,217,217,1) 0%, rgba(214,214,214,1) 20%, rgba(226,226,226,1) 62%, rgba(255,255,255,1) 100%);
+    background: -webkit-radial-gradient(circle, rgba(217,217,217,1) 0%, rgba(214,214,214,1) 20%, rgba(226,226,226,1) 62%, rgba(255,255,255,1) 100%);
+    background: radial-gradient(circle, rgba(217,217,217,1) 0%, rgba(214,214,214,1) 20%, rgba(226,226,226,1) 62%, rgba(255,255,255,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#d9d9d9",endColorstr="#ffffff",GradientType=1);
+}
+
+.button-color, .box-blue__background{
+    background: #1E4EA1;
+}
+
+.form-check-input:checked {
+    background-color: #1E4EA1;
+    border-color: #1E4EA1;
+}
+
+.text-box{
+    outline: none;
+}
+.text-blue__color, .icon-blue__color{
+    color:#1E4EA1
+}
+
+.button-white__color{
+    background: white;
+}
+
+.form-control:focus, .form-select:focus{
+    border-color: #fff0;
+}
+
+.ss-btn{
+    background: #1e4ea1;
+    border-bottom: 5px solid;
+    border-bottom-color: #163C7C;
+}
+
+.border-bottom-danger{
+    border-bottom: 5px solid;
+    border-bottom-color: #9c2632;
+}
+
+.table-curved thead {
+border-radius: 0 5px 5px 0;
+}
+.table-curved td {
+position: relative;
+background-color: #ffffff;
+padding: 6px 10px;
+}
+
+.table-curved td:first-child {
+border-radius: 5px 0 0 5px;
+}
+
+.table-curved td:last-child {
+border-radius: 0 5px 5px 0;
+}
+
+
+.table-curved > thead > tr > th:last-child{
+border-radius: 0 5px 5px 0;  
+}
+
+.table-curved > thead > tr > th:first-child{
+border-radius: 5px 0 0 5px;
+}

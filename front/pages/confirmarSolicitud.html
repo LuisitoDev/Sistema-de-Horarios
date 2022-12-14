@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="shortcut icon" href="../assets/Logo-FCFM.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/front/css/main.css">
+    <title>Alumnos solicitudes</title>
+</head>
+<body class="main-background"   >
+  
+   <header class="row position-fixed w-100" style="margin-bottom: 150px; z-index: 10;" >
+    <nav class="navbar navbar-expand-lg button-color col-lg-12 d-none d-lg-block">
+         
+          <a class="navbar-brand text-white" href="#">Registro FCFM</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon  text-white "></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active text-white " aria-current="page" href="#">Inicio</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white " href="#">Solicitudes</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white " href="#">Cerrar sesión</a>
+              </li>
+            </ul>
+            <span class="navbar-text text-white ">
+              Hola, Derek!
+            </span>
+          </div>
+        
+      </nav>
+   </header>
+
+    <main class="row mx-2 mb-md-5 pt-lg-5" >
+        <h1 class="text-center my-5 display-4  ">Confirmar solicitud</h1>
+        <div class="col-12 col-lg-8 container p-0 mt-lg-4 bg-white shadow-lg  mb-2 p-4">
+           
+            <h1 class="text-center my-3 fs-3">Información del asesor</h1>
+            <h5 style="font-size:1rem"><i class="fa-solid fa-user"></i> Nombre: <span> Derek Jafet Cortes Madriz</span></h5>
+            <h5 style="font-size:1rem"><i class="fa-solid fa-hashtag pe-1"></i>Matricula: <span>  1846296</span></h5>
+            <h5  style="font-size:1rem"><i class="fa-solid fa-graduation-cap"></i>Correo:<span> derek.cortesmz@uanl.edu.mx</span></h5>
+            <h5 style="font-size:1rem"><i class="fa-solid fa-book pe-1"></i>Programa: <span> Videos</span></h5>
+
+        </div>
+
+
+        <div class="col-12 col-lg-8 container p-0 mt-lg-4 bg-white shadow-lg px-4 mb-5">
+            <h1 class="my-5 fs-3">Horario</h1>
+           
+            <div class="d-md-flex justify-content-between align-items-center  mb-5">
+                <div class="d-flex justify-content-center align-items-center mb-5 mb-md-0">
+
+                
+                <select name="horario" class="p-1 ss-btn text-white ">
+                    <option value="Martes-Jueves">Martes-Jueves</option>
+                    <option value="Completo">Completo</option>
+
+                    <option value="Lunes-Miercoles-Viernes">Lunes-Miercoles-Viernes</option>
+                    <option value="Personalizado">Personalizado</option>
+
+                </select>
+            </div>
+                <div class="text-center">
+
+                    <input type="text" class="form-control mb-3" placeholder="Nombre de horario">
+                <button class="btn btn-primary ss-btn w-100">Crear nuevo</button>
+            </div>
+            </div>
+            <div class="d-md-flex justify-content-between mb-5" role="group" aria-label="Basic checkbox toggle button group">
+                <div class="mb-2">
+
+
+                <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off">
+                <label class="btn btn-outline-primary  w-100" for="btncheck1">Lunes</label>
+                </div>
+            <div class="mb-2">
+
+
+                <input type="checkbox" class="btn-check" id="btncheck2" autocomplete="off">
+                <label class="btn btn-outline-primary w-100" for="btncheck2">Martes</label>
+            </div>
+            <div class="mb-2">
+
+
+                <input type="checkbox" class="btn-check" id="btncheck3" autocomplete="off">
+                <label class="btn btn-outline-primary w-100" for="btncheck3">Miercoles</label>
+            </div>
+            <div class="mb-2">
+
+
+                <input type="checkbox" class="btn-check" id="btncheck4" autocomplete="off">
+                <label class="btn btn-outline-primary w-100" for="btncheck4">Jueves</label>
+            </div>
+            <div class="mb-2">
+
+
+                <input type="checkbox" class="btn-check" id="btncheck5" autocomplete="off">
+                <label class="btn btn-outline-primary w-100" for="btncheck5">Viernes</label>
+            </div>
+              </div>
+
+              <button class="btn btn-primary ss-btn w-100 mb-3">Guardar y asignar</button>
+
+        </div>
+
+        <div class="col-12 col-lg-8 container p-0 mt-lg-4 bg-white shadow-lg px-4 mb-5">
+            <h1 class="my-5 fs-3">Horarios semanales</h1>
+            <table class="table table-borderless table-curved " style="border-collapse: separate;
+            border-spacing:0px 15px;" >
+              <thead class=" text-white p-2 box-blue__background" >
+                <tr >
+                  <th scope="col  ">Dia</th>
+                  <th class="d-none d-lg-table-cell" scope="col">De:</th>
+                  <th class="d-none d-lg-table-cell" scope="col">Hasta</th>
+                
+            
+                </tr>
+              </thead>
+              <tbody class="bg-white align-middle">
+                <tr class="text-blue__color " >
+                    <td scope="row "><span>Lunes</span></td>
+                    <td class="d-none d-lg-table-cell"><select name="horario" class="p-1 ss-btn text-white ">
+                    <option value="Martes-Jueves">8:00</option>
+                    <option value="Completo">8:30</option>
+
+                    <option value="Lunes-Miercoles-Viernes">9:00</option>
+                    <option value="Personalizado">9:30</option>
+
+                </select></td>
+                <td class="d-none d-lg-table-cell"><select name="horario" class="p-1 ss-btn text-white ">
+                    <option value="Martes-Jueves">8:00</option>
+                    <option value="Completo">8:30</option>
+
+                    <option value="Lunes-Miercoles-Viernes">9:00</option>
+                    <option value="Personalizado">9:30</option>
+
+                </select></td>
+                   
+                  </tr>
+                <tr class="text-blue__color " >
+                  <td scope="row "><span>Martes</span></td>
+                  <td class="d-none d-lg-table-cell"><select name="horario" class="p-1 ss-btn text-white ">
+                    <option value="Martes-Jueves">8:00</option>
+                    <option value="Completo">8:30</option>
+
+                    <option value="Lunes-Miercoles-Viernes">9:00</option>
+                    <option value="Personalizado">9:30</option>
+
+                </select></td>
+                <td class="d-none d-lg-table-cell"><select name="horario" class="p-1 ss-btn text-white ">
+                    <option value="Martes-Jueves">8:00</option>
+                    <option value="Completo">8:30</option>
+
+                    <option value="Lunes-Miercoles-Viernes">9:00</option>
+                    <option value="Personalizado">9:30</option>
+
+                </select></td>
+                 
+                </tr>
+                <tr class="text-blue__color " >
+                    <td scope="row "><span>Miercoles</span></td>
+                    <td class="d-none d-lg-table-cell"><select name="horario" class="p-1 ss-btn text-white ">
+                        <option value="Martes-Jueves">8:00</option>
+                        <option value="Completo">8:30</option>
+    
+                        <option value="Lunes-Miercoles-Viernes">9:00</option>
+                        <option value="Personalizado">9:30</option>
+    
+                    </select></td>
+                    <td class="d-none d-lg-table-cell"><select name="horario" class="p-1 ss-btn text-white ">
+                        <option value="Martes-Jueves">8:00</option>
+                        <option value="Completo">8:30</option>
+    
+                        <option value="Lunes-Miercoles-Viernes">9:00</option>
+                        <option value="Personalizado">9:30</option>
+    
+                    </select></td>
+                   
+                  </tr>
+                  <tr class="text-blue__color " >
+                    <td scope="row "><span>Jueves</span></td>
+                    <td class="d-none d-lg-table-cell"><select name="horario" class="p-1 ss-btn text-white ">
+                        <option value="Martes-Jueves">8:00</option>
+                        <option value="Completo">8:30</option>
+    
+                        <option value="Lunes-Miercoles-Viernes">9:00</option>
+                        <option value="Personalizado">9:30</option>
+    
+                    </select></td>
+                    <td class="d-none d-lg-table-cell"><select name="horario" class="p-1 ss-btn text-white ">
+                        <option value="Martes-Jueves">8:00</option>
+                        <option value="Completo">8:30</option>
+    
+                        <option value="Lunes-Miercoles-Viernes">9:00</option>
+                        <option value="Personalizado">9:30</option>
+    
+                    </select></td>
+                   
+                  </tr>
+                  <tr class="text-blue__color " >
+                    <td scope="row "><span>Viernes</span></td>
+                    <td class="d-none d-lg-table-cell"><select name="horario" class="p-1 ss-btn text-white ">
+                        <option value="Martes-Jueves">8:00</option>
+                        <option value="Completo">8:30</option>
+    
+                        <option value="Lunes-Miercoles-Viernes">9:00</option>
+                        <option value="Personalizado">9:30</option>
+    
+                    </select></td>
+                    <td class="d-none d-lg-table-cell"><select name="horario" class="p-1 ss-btn text-white ">
+                        <option value="Martes-Jueves">8:00</option>
+                        <option value="Completo">8:30</option>
+    
+                        <option value="Lunes-Miercoles-Viernes">9:00</option>
+                        <option value="Personalizado">9:30</option>
+    
+                    </select></td>
+                   
+                  </tr>
+              </tbody>
+            </table>
+            
+        </div>
+        <div class="d-flex justify-content-between col-12 col-lg-8 container p-0 mt-lg-4 px-4 mb-5">
+            <button class="btn btn-danger w-100 mb-3 border-bottom-danger mx-1">Rechazar</button>
+            <button class="btn btn-primary ss-btn w-100 mb-3">Aceptar</button>
+        </div>
+    </main>
+ 
+   
+</body>
+
+</html>
