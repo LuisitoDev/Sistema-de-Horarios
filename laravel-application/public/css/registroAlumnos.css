@@ -1,0 +1,40 @@
+form {
+    font-size: 1rem;
+}
+
+select {
+    font-size: 34px;
+}
+
+i{
+    color: #183153;
+}
+
+.btn{
+    background: #1e4ea1;
+    border-bottom: 5px solid;
+    border-bottom-color: #163C7C;
+}
+
+button{
+    background: #1e4ea1;
+    border-bottom: 5px solid;
+    border-bottom-color: #163C7C;
+}
+
+.no-device a{
+    color: #1e4ea1;
+    font-weight: bold;
+    text-decoration: none;
+    border: none;
+    background-color: transparent;
+}
+
+.no-device a:hover { 
+    text-decoration: underline;
+}
+
+img.logo-registro {
+    width: 120px;
+    height: 120px;
+}
