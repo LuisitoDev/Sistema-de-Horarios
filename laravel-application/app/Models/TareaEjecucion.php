@@ -10,15 +10,25 @@ class TareaEjecucion extends Model
 {
     use HasFactory;
 
-    protected $table = 'tarea_ejecucion';
+    public const table_name = "tarea_ejecucion";
+    public const id = "id";
+    public const hora_ejecucion = "hora_ejecucion";
+    public const id_tarea_programada = "id_tarea_programada";
+
+    protected $table = self::table_name;
 
     protected $fillable = [
-        'id',
-        'hora_ejecucion',
-        'id_tarea_programada' 
+        self::id,
+        self::hora_ejecucion,
+        self::id_tarea_programada 
     ];
 
     public function tarea_programada() : BelongsTo{
-        return $this->belongsTo(TareaProgramada::class, 'id_tarea_programada', 'id');
+        return $this->belongsTo(TareaProgramada::class, self::id_tarea_programada, TareaProgramada::id);
+    }
+
+    public function format()
+    {
+        return $this;
     }
 }

@@ -10,18 +10,31 @@ class Rotacion extends Model
 {
     use HasFactory;
 
-    protected $table = 'rotaciones';
+    public const table_name = "rotaciones";
+    public const id = "id";
+    public const lunes_presencial = "lunes_presencial";
+    public const martes_presencial = "martes_presencial";
+    public const miercoles_presencial = "miercoles_presencial";
+    public const jueves_presencial = "jueves_presencial";
+    public const viernes_presencial = "viernes_presencial";
+
+    protected $table = self::table_name;
     protected $fillable = [
-        'id',
-        'lunes_presencial',
-        'martes_presencial',
-        'miercoles_presencial',
-        'jueves_presencial',
-        'viernes_presencial'
+        self::id,
+        self::lunes_presencial,
+        self::martes_presencial,
+        self::miercoles_presencial,
+        self::jueves_presencial,
+        self::viernes_presencial
     ];
 
     public function usuarios() : HasMany
     {
-        return $this->hasMany(Usuario::class, "id_rotacion", "id");
+        return $this->hasMany(Usuario::class, Usuario::id_rotacion, self::id);
+    }
+
+    public function format()
+    {
+        return $this;
     }
 }

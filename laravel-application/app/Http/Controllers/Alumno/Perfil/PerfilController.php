@@ -57,6 +57,7 @@ class PerfilController extends Controller
 
             //Se hace el select correspondiente haciendo un join usando los fundamentos aprendidos en Modelos de
             //administracion de datos y Alto Volumen de Datos
+            //TODO:TEST PETICION
             $usuario = $this->usuarioRepository->findProfileById($id_usuario);
             
             $usuario['imagen']=base64_encode($usuario['imagen']);

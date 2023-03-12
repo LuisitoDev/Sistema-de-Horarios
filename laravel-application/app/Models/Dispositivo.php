@@ -10,16 +10,21 @@ class Dispositivo extends Model
 {
     use HasFactory;
 
-    protected $table = 'dispositivos';
+    public const table_name = "dispositivos";
+    public const id = "id";
+    public const direccion_mac = "direccion_mac";
+    public const id_usuario = "id_usuario";
+
+    protected $table = self::table_name;
     protected $fillable = [
-        'id',
-        'direccion_mac',
-        'id_usuario'
+        self::id,
+        self::direccion_mac,
+        self::id_usuario
     ];
 
     //TODO: RELACION - PENDIENTE PROBAR
     public function usuario() : BelongsTo{
-        return $this->belongsTo(Usuario::class, 'id_usuario', 'id');
+        return $this->belongsTo(Usuario::class, self::id_usuario, Usuario::id);
     }
 
     public function format()

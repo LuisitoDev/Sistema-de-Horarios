@@ -49,12 +49,17 @@ class AlumnosEntradasController extends Controller
             if ($search == "null")
                 $search = "";
 
-            $totalOfStudents = count($this->usuarioRepository->findByFieldBetweenDates($search, $dayFrom, $dayTo));
+            $allStudents = $this->usuarioRepository->findByFieldBetweenDates($search, $dayFrom, $dayTo);
+
+            if ($allStudents === null)
+                $totalOfStudents = 0;
+            else 
+                $totalOfStudents = count($allStudents);
 
             $students = $this->usuarioRepository->findStudentsChecks($search, $dayFrom, $dayTo, $page, $elements);
 
             $numberOfPages = 0;
-            if(count($students) != 0){
+            if($students !== null){
                 $numberOfPages = ceil($totalOfStudents / $elements);
             }
 

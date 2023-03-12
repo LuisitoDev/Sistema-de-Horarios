@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\Alumnos\AlumnosController;
 use App\Http\Controllers\Admin\Alumnos\AlumnosEntradasController;
 use App\Http\Controllers\Admin\Solicitudes\SolicitudesController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Alumno\AlumnoPerfil\PerfilController;
+use App\Http\Controllers\Alumno\Perfil\PerfilController;
 use App\Http\Controllers\Alumno\CargaHoras\EntradaController;
 use App\Http\Controllers\Alumno\Progreso\ProgresoController;
 use App\Http\Controllers\Alumno\Registro\RegistroController;
@@ -84,3 +84,7 @@ Route::get('/progreso', [AssessorsController::class, 'Progress'])->name('progres
 
 //TEST
 Route::get('/entradas', [AssessorsController::class, 'Hour'])->name('hour');//->middleware('auth.device');
+
+
+//TEST
+Route::get('/perfil', [AssessorsController::class, 'Perfil'])->name('perfil');//->middleware('auth.device');

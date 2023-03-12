@@ -10,22 +10,22 @@ class CicloEscolar extends Model
 {
     use HasFactory;
 
-    protected $table = 'ciclo_escolar';
+    public const table_name = "ciclo_escolar";
+    public const id = "id";
+    public const fecha_ingreso = "fecha_ingreso";
+    public const fecha_salida = "fecha_salida";
+
+    protected $table = self::table_name;
     protected $fillable = [
-        'id',
-        'fecha_ingreso',
-        'fecha_salida'
+        self::id,
+        self::fecha_ingreso,
+        self::fecha_salida
     ];
 
     //TODO: PENDIENTE TESTEAR
     public function usuarios() : HasMany
     {
-        return $this->hasMany(Usuario::class, "id_ciclo_escolar", "id");
-    }
-
-    public function solicitudesUsuario() : HasMany
-    {
-        return $this->hasMany(SolicitudUsuario::class, "id_ciclo_escolar", "id");
+        return $this->hasMany(Usuario::class, Usuario::id_ciclo_escolar, self::id);
     }
 
     public function format()

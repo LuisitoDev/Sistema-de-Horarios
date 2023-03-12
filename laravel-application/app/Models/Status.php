@@ -10,15 +10,24 @@ class Status extends Model
 {
     use HasFactory;
 
+    public const table_name = "solicitudes_dispositivos";
+    public const id = "id";
+    public const nombre = "nombre";
+
     public $incrementing = false;
-    protected $table = 'status';
+    protected $table = self::table_name;
     protected $fillable = [
-        'id',
-        'nombre'
+        self::id,
+        self::nombre
     ];
 
     public function entradas() : HasMany
     {
-        return $this->hasMany(Entrada::class, "id_status", "id");
+        return $this->hasMany(Entrada::class, Entrada::id_status, self::id);
+    }
+
+    public function format()
+    {
+        return $this;
     }
 }

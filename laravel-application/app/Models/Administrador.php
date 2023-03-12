@@ -9,11 +9,16 @@ class Administrador extends Model
 {
     use HasFactory;
 
-    protected $table = 'administradores';
+    public const table_name = "administradores";
+    public const id = "id";
+    public const username = "username";
+    public const password = "password";
+
+    protected $table = self::table_name;
     protected $fillable = [
-        'id',
-        'username',
-        'password'
+        self::id,
+        self::username,
+        self::password
     ];
 
     public function format()

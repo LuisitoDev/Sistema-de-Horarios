@@ -21,6 +21,7 @@ use App\Exceptions\ExceptionHandler;
 
 //Utils
 use App\Enums\StatusResponseEnum;
+use Illuminate\Support\Facades\Log;
 
 class AlumnosController extends Controller
 {
@@ -50,12 +51,17 @@ class AlumnosController extends Controller
             if ($dayTo === "0")
                 $dayTo = null;
 
-            $totalOfStudents = count($this->usuarioRepository->findByFieldBetweenDates($search, $dayFrom, $dayTo));
+            $allStudents = $this->usuarioRepository->findByFieldBetweenDates($search, $dayFrom, $dayTo);
 
-            $students = $this->usuarioRepository->findByFieldBetweenDatesWithPagination($search, $dayFrom, $dayTo, $page, $elements);
+            if ($allStudents === null)
+                $totalOfStudents = 0;
+            else 
+                $totalOfStudents = count($allStudents);
+
+            $students = $this->usuarioRepository->findByFieldBetweenDates($search, $dayFrom, $dayTo, $page, $elements);
 
             $numberOfPages = 0;
-            if(count($students) != 0){
+            if($students !== null){
                 $numberOfPages = ceil($totalOfStudents / $elements);
             }
 

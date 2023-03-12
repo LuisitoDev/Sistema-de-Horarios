@@ -8,13 +8,22 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Dia extends Model
 {
-    protected $table = 'dias';
+    public const table_name = "dias";
+    public const id = "id";
+    public const nombre = "nombre";
+
+    protected $table = self::table_name;
     protected $fillable = [
-        'id',
-        'nombre'
+        self::id,
+        self::nombre
     ];
 
     public function turnoDiario() : HasOne {
-        return $this->hasOne(TurnoDiario::class, 'dia', 'id');
+        return $this->hasOne(TurnoDiario::class, TurnoDiario::dia, self::id);
+    }
+
+    public function format()
+    {
+        return $this;
     }
 }

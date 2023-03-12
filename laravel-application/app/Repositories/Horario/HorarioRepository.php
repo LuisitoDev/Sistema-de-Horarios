@@ -6,6 +6,7 @@ use App\Models\Horario;
 
 class HorarioRepository{
 
+    //TODO: REFACTOR
     public function find($data)
     {
         return Horario::query()

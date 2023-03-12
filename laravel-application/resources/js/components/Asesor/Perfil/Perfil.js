@@ -31,6 +31,7 @@ const Perfil = (props) => {
         setIsModalActive(true);
     }
 
+    //TODO: VOLVER ESTO UN SERVICIO
     const getUserInfo= ()=>{
         axios.get('/profile').then(res => {
             setProfile(res.data.usuario);

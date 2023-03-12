@@ -11,17 +11,26 @@ class Horario extends Model
 {
     use HasFactory;
     
-    protected $table = 'horarios';
+    public const table_name = "horarios";
+    public const id = "id";
+    public const id_usuario = "id_usuario";
+
+    protected $table = self::table_name;
     protected $fillable = [
-        'id',
-        'id_usuario'
+        self::id,
+        self::id_usuario
     ];
 
     public function usuario() : BelongsTo{
-        return $this->belongsTo(Usuario::class, 'id_usuario', 'id');
+        return $this->belongsTo(Usuario::class, self::id_usuario, Usuario::id);
     }
 
     public function turnosDiarios() : HasMany {
-        return $this->hasMany(TurnoDiario::class, 'id_horario', 'id');
+        return $this->hasMany(TurnoDiario::class, TurnoDiario::id_horario, self::id);
+    }
+
+    public function format()
+    {
+        return $this;
     }
 }

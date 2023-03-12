@@ -39,4 +39,10 @@ class AssessorsController extends Controller
         return view('asesor.carga-horas');
     }
 
+    
+    public function Perfil(){
+        return view('asesor.perfil-alumno');
+    }
+
+
 }

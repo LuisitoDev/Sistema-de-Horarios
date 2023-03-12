@@ -164,8 +164,8 @@ const Alumnos = (props)=>{
                     firstLastName: student.apellido_pat,
                     secondLastName: student.apellido_mat,
                     email: student.correo_universitario,
-                    career: student.abreviacion,
-                    program: student.servicio_nombre,
+                    career: student.carrera.abreviacion,
+                    program: student.servicios[0].nombre,
                 }
             })
 
@@ -190,26 +190,28 @@ const Alumnos = (props)=>{
             const totalPagesBack = data.totalPages;
 
             setTotalPages(totalPagesBack)
+            
+            if (data.students !== null){
 
-            const studentsMapped = data.students.map(student =>  {
-                return {
-                    tuition: student.matricula,
-                    names: student.nombre,
-                    firstLastName: student.apellido_pat,
-                    secondLastName: student.apellido_mat,
-                    email: student.correo_universitario,
-                    career: student.abreviacion,
-                    program: student.servicio_nombre,
-                    checkIns: student.entradas,
-                    pendingHours: student.horas_pendientes,
-                    // completeChecks: student.entradas_completadas,
-                    // incompleteChecks: student.entradas_incompletadas,
-                    // missingChecks: student.entradas_faltantes,
-                }
-            })
+                const studentsMapped = data.students.map(student =>  {
+                    return {
+                        tuition: student.matricula,
+                        names: student.nombre,
+                        firstLastName: student.apellido_pat,
+                        secondLastName: student.apellido_mat,
+                        email: student.correo_universitario,
+                        career: student.carrera.abreviacion,
+                        program: student.servicios[0].nombre,
+                        checkIns: student.cant_entradas,
+                        pendingHours: student.horas_pendientes === null ? 0 : student.horas_pendientes,
+                        // completeChecks: student.entradas_completadas,
+                        // incompleteChecks: student.entradas_incompletadas,
+                        // missingChecks: student.entradas_faltantes,
+                    }
+                })
 
-
-            setStudents(studentsMapped)
+                setStudents(studentsMapped)
+            }
         }).catch((exception)=>{
             showUpExceptionModal(exception)
         })

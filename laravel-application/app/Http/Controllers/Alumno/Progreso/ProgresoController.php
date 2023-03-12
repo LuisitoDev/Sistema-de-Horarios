@@ -17,6 +17,7 @@ use App\Exceptions\ExceptionHandler;
 
 //Utils
 use App\Enums\StatusResponseEnum;
+use Illuminate\Support\Facades\Log;
 
 class ProgresoController extends Controller
 {
@@ -38,9 +39,11 @@ class ProgresoController extends Controller
             else
                 $id_usuario = env("ID_USER_DEBUGG");
 
-            $dayFrom === "0" ?  $dayFrom = null : $dayFrom = $dayFrom ." 00:00:00";
-
-            $dayTo === "0" ?  $dayTo = null : $dayTo =  $dayTo ." 23:59:59";
+            if ($dayFrom === "0")
+                $dayFrom = null;
+            
+            if ($dayFrom === "0")
+                $dayTo = null;
 
             $entradas = $this->entradaRepository->findByUserBetweenDates($id_usuario, $dayFrom, $dayTo);
             $cantPaginas = ceil( count($entradas) / $elements );
@@ -79,11 +82,13 @@ class ProgresoController extends Controller
 
             $pagination = ($page - 1) * $elements;
 
-            $dayFrom === "0" ?  $dayFrom = null : $dayFrom = $dayFrom ." 00:00:00";
+            if ($dayFrom === "0")
+                $dayFrom = null;
+            
+            if ($dayFrom === "0")
+                $dayTo = null;
 
-            $dayTo === "0" ?  $dayTo = null : $dayTo =  $dayTo ." 23:59:59";
-
-            $entradas = $this->entradaRepository->findByUserBetweenDatesWithPagination($id_usuario, $dayFrom, $dayTo, $pagination, $elements);
+            $entradas = $this->entradaRepository->findByUserBetweenDates($id_usuario, $dayFrom, $dayTo, $pagination, $elements);
 
             return response()->json([
                 "entradas" => $entradas

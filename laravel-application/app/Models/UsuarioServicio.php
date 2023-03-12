@@ -8,10 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class UsuarioServicio extends Model
 {
     use HasFactory;
-    protected $table = 'usuarios_servicios';
+
+    public const table_name = "usuarios_servicios";
+    public const id_usuario = "id_usuario";
+    public const id_servicio = "id_servicio";
+
+    protected $table = self::table_name;
     protected $fillable = [
-        'id_usuario',
-        'id_servicio'
+        self::id_usuario,
+        self::id_servicio
     ];
 
+    public function format()
+    {
+        return $this;
+    }
 }

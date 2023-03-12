@@ -16,6 +16,7 @@ use App\Repositories\Horario\HorarioRepository;
 use App\Repositories\TurnoDiario\TurnoDiarioRepository;
 use Throwable;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class EntradaController extends Controller
 {
@@ -203,6 +204,7 @@ class EntradaController extends Controller
     }
 
     public function ObtenerEntradaDiaria(Request $request) {
+
         try{
             if (!env("DEBUGGER")){
                 $id_usuario = getUserByMacAddress($request->ip());
@@ -256,16 +258,18 @@ class EntradaController extends Controller
             }
             
             $horarios = $this->horarioRepository->find(['id_usuario' => $id_usuario]);
-
-            $turnosDiarios = $this->turnoDiarioRepository->findByHorarioAndDia($horarios->id, $diaActual);
-
+            
+            $turnosDiarios = $this->turnoDiarioRepository->findByHorarioAndDia($horarios[0]->id, $diaActual);
+            
             $entradas = $this->entradaRepository->findByUsuarioAndHoraEntradaProgramada($id_usuario, Carbon::today());
-
-            if (count($entradas) == 0){
+            
+            if ($entradas === null){
                 $ultimaEntrada = $this->entradaRepository->findUltimaEntradaByUsuario($id_usuario);
 
                 if ($ultimaEntrada->id_status == StatusType::TRABAJANDO)
                     $entradas[0] = $ultimaEntrada;
+                else
+                    $entradas = [];
             }
 
 

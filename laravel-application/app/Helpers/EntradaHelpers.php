@@ -15,20 +15,16 @@ use Illuminate\Support\Facades\Log;
 class EntradaHelpers {
     public static $toleranceRangeCheckout = 0.02;
     public static $toleranceRangeOverTime = 0.5;
-    private static $entradaRepository = new EntradaRepository();
-    private static $horarioRepository = new HorarioRepository();
-    private static $turnoDiarioRepository = new TurnoDiarioRepository();
+    private static EntradaRepository $entradaRepository;
+    private static HorarioRepository $horarioRepository;
+    private static TurnoDiarioRepository $turnoDiarioRepository;
 
-    // public function __construct(
-    //     EntradaRepository $entradaRepository,
-    //     HorarioRepository $horarioRepository,
-    //     TurnoDiarioRepository $turnoDiarioRepository
-    // ) {
-    //     $this->entradaRepository = $entradaRepository;
-    //     $this->turnoDiarioRepository = $turnoDiarioRepository;
-    //     $this->horarioRepository = $horarioRepository;
-    // }
-
+    static function init()
+    {
+        self::$entradaRepository = new EntradaRepository();
+        self::$horarioRepository = new HorarioRepository();
+        self::$turnoDiarioRepository = new TurnoDiarioRepository();
+    }
 
     public static function GetEntradaActiva($id_usuario) {
 
@@ -64,7 +60,6 @@ class EntradaHelpers {
     public static function BuildEntradaDefault($id_usuario){
         // Instancia una entrada con los datos basicos necesarios, su hora de entrada y las potenciales horas que debio de hacer
         $entrada = self::$entradaRepository->getEntradaModel();
-
         $turnoDiario = self::GetTurnosDiarios($id_usuario);
 
         if(count($turnoDiario) == 0)
@@ -215,7 +210,7 @@ class EntradaHelpers {
         $horarios = self::$horarioRepository->find(['id_usuario' => $id_usuario]);
 
         if($horarios != null)
-            $turnosDiarios = self::$turnoDiarioRepository->findByHorarioAndDia($horarios->id, $diaActual);
+            $turnosDiarios = self::$turnoDiarioRepository->findByHorarioAndDia($horarios[0]->id, $diaActual);
         else 
             $turnosDiarios = [];
 
@@ -239,3 +234,5 @@ class EntradaHelpers {
     }
 
 }
+
+EntradaHelpers::init();

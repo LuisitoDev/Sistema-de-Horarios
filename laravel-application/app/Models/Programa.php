@@ -11,19 +11,28 @@ class Programa extends Model
 {
     use HasFactory;
 
-    protected $table = 'programas';
+    public const table_name = "programas";
+    public const id = "id";
+    public const nombre = "nombre";
+
+    protected $table = self::table_name;
     protected $fillable = [
-        'id',
-        'nombre'
+        self::id,
+        self::nombre
     ];
 
     public function usuarios() : BelongsToMany
     {
-        return $this->belongsToMany(Usuario::class, UsuarioPrograma::class, "id_programa", "id_usuario");
+        return $this->belongsToMany(Usuario::class, UsuarioPrograma::class, UsuarioPrograma::id_programa, UsuarioPrograma::id_usuario);
     }
 
     public function solicitudUsuario() : HasOne
     {
-        return $this->hasOne(SolicitudUsuario::class, "id", "id_programa_usuario");
+        return $this->hasOne(SolicitudUsuario::class, self::id, SolicitudUsuario::id_programa_usuario);
+    }
+
+    public function format()
+    {
+        return $this;
     }
 }

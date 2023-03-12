@@ -68,13 +68,13 @@ const Solicitudes = (props)=>{
             // Iteracion de solicitudes
             const requestsMapped = data.requests.map(request => {return {
                 id: request.id,
-                tuition: request.matricula,
-                names: request.nombre,
-                firstLastName: request.apellido_pat,
-                secondLastName: request.apellido_mat,
-                email: request.correo_universitario,
-                career: request.abreviacion,
-                program: request.servicio_nombre,
+                tuition: request.usuario.matricula,
+                names: request.usuario.nombre,
+                firstLastName: request.usuario.apellido_pat,
+                secondLastName: request.usuario.apellido_mat,
+                email: request.usuario.correo_universitario,
+                career: request.usuario.carrera.abreviacion,
+                program: request.usuario.servicios[0].servicio_nombre,
                 device: request.direccion_mac_dispositivo
             }})
             console.log(data)

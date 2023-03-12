@@ -9,21 +9,31 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Carrera extends Model
 {
     use HasFactory;
+
+    public const table_name = "carreras";
+    public const id = "id";
+    public const nombre = "nombre";
+    public const abreviacion = "abreviacion";
     
-    protected $table = 'carreras';
+    protected $table = self::table_name;
     protected $fillable = [
-        'id',
-        'nombre',
-        'abreviacion'
+        self::id,
+        self::nombre,
+        self::abreviacion
     ];
 
     public function usuarios() : HasMany
     {
-        return $this->hasMany(Usuario::class, "id_carrera", "id");
+        return $this->hasMany(Usuario::class, Usuario::id_carrera, self::id);
     }
 
     public function solicitudesUsuario() : HasMany
     {
-        return $this->hasMany(SolicitudUsuario::class, "id_carrera", "id");
+        return $this->hasMany(SolicitudUsuario::class, SolicitudUsuario::id_carrera_usuario, self::id);
+    }
+
+    public function format()
+    {
+        return $this;
     }
 }

@@ -10,14 +10,23 @@ class TareaProgramada extends Model
 {
     use HasFactory;
 
-    protected $table = 'tarea_programada';
+    public const table_name = "tarea_programada";
+    public const id = "id";
+    public const nombre_tarea = "nombre_tarea";
+
+    protected $table = self::table_name;
     protected $fillable = [
-        'id',
-        'nombre_tarea' 
+        self::id,
+        self::nombre_tarea
     ];
 
     public function tareasEjecucion() : HasMany
     {
-        return $this->hasMany(TareaEjecucion::class, "id_tarea_programada", "id");
+        return $this->hasMany(TareaEjecucion::class, TareaEjecucion::id_tarea_programada, self::id);
+    }
+
+    public function format()
+    {
+        return $this;
     }
 }

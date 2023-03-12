@@ -9,10 +9,19 @@ class UsuarioPrograma extends Model
 {
     use HasFactory;
 
+    public const table_name = "usuarios_programas";
+    public const id_usuario = "id_usuario";
+    public const id_programa = "id_programa";
+
     //TODO: RELACION - POR QUE EL id_usuario ES PRIMARY KEY, NO DEBERÍA SER LLAVE COMPUESTA? asi como "usuarios_servicios"
-    protected $table = 'usuarios_programas';
+    protected $table = self::table_name;
     protected $fillable = [
-        'id_usuario',
-        'id_programa'
+        self::id_usuario,
+        self::id_programa
     ];
+
+    public function format()
+    {
+        return $this;
+    }
 }

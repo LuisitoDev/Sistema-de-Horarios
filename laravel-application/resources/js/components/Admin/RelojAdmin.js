@@ -19,7 +19,7 @@ const RelojAdmin = () => {
     const [isLoadingRequest, setIsLoadingRequest] = useState(false)
     const [userNotFound, setUserNotFound] = useState(false)
 
-    const [profile, setProfile] = useState({});
+    const [profile, setProfile] = useState(null);
 
 
     const searchHandler = (e) => {
@@ -61,11 +61,11 @@ const RelojAdmin = () => {
                         !userNotFound &&
                         <>
                             <h1 className='text-center fw-bold'> {lastTuition == null ? 'No hay alumno seleccionado' : '#'+lastTuition}</h1>
-                            {lastTuition != null &&
+                            {lastTuition != null && profile != null &&
                             <div className='d-flex justify-content-around m-auto w-50 rounded align-items-center'>
                                 <DatoPerfil icon="fa-user" info={profile.nombre + ' ' + profile.apellido_pat + ' '+ profile.apellido_mat}></DatoPerfil>
-                                <DatoPerfil icon="fa-landmark" info={profile.abreviacion}></DatoPerfil>
-                                <DatoPerfil icon="fa-at" info={profile.correo}></DatoPerfil>
+                                <DatoPerfil icon="fa-landmark" info={profile.carrera.abreviacion}></DatoPerfil>
+                                <DatoPerfil icon="fa-at" info={profile.correo_universitario}></DatoPerfil>
                             </div>
                             }
                             {lastTuition != null ? 
@@ -100,11 +100,11 @@ const RelojAdmin = () => {
                         !userNotFound &&
                         <>
                             <h1 className='text-center fw-bold'> {lastTuition == null ? 'No hay alumno seleccionado' : '#'+lastTuition}</h1>
-                            {lastTuition != null &&
+                            {lastTuition != null && profile != null &&
                             <div className='d-flex justify-content-around m-auto w-50 rounded align-items-center'>
                                 <DatoPerfil icon="fa-user" info={profile.nombre + ' ' + profile.apellido_pat + ' '+ profile.apellido_mat}></DatoPerfil>
-                                <DatoPerfil icon="fa-landmark" info={profile.abreviacion}></DatoPerfil>
-                                <DatoPerfil icon="fa-at" info={profile.correo}></DatoPerfil>
+                                <DatoPerfil icon="fa-landmark" info={profile.carrera.abreviacion}></DatoPerfil>
+                                <DatoPerfil icon="fa-at" info={profile.correo_universitario}></DatoPerfil>
                             </div>
                             }
                             {lastTuition != null ? 

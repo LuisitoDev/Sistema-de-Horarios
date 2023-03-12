@@ -3,14 +3,16 @@
 namespace App\Repositories\Servicio;
 
 use App\Models\Servicio;
+use App\Models\UsuarioServicio;
+use App\Models\Usuario;
 
 class ServicioRepository{
 
     public function getHorasTotalesByServicioUsuario($id_usuario)
     {
-        return Servicio::join('usuarios_servicios', 'usuarios_servicios.id_servicio', '=', 'servicios.id')
-        ->join('usuarios', 'usuarios_servicios.id_usuario', '=', 'usuarios.id')
-        ->where('usuarios.id', '=', $id_usuario)->sum('horas_totales');
+        return Servicio::whereHas(Usuario::table_name, function($query) use($id_usuario){
+            $query->where(UsuarioServicio::id_usuario, $id_usuario);
+        })->sum(Servicio::horas_totales);
     }
 
 }
