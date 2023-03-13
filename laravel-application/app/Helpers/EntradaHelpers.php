@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Repositories\Entrada\EntradaRepository;
 use App\Enums\StatusType;
 use App\Enums\DiasEnum;
+use App\Exceptions\CustomException;
 use App\Repositories\Horario\HorarioRepository;
 use App\Repositories\TurnoDiario\TurnoDiarioRepository;
 use Illuminate\Support\Carbon;
@@ -27,32 +28,29 @@ class EntradaHelpers {
     }
 
     public static function GetEntradaActiva($id_usuario) {
-
         // Busca si existe una entrada activa que aun no ha sido cerrada
         $entrada = self::$entradaRepository->findEntradaActivaByUsuario($id_usuario);
-
 
         //  Si no hay una entrada activa entonces regresa nulo para manejarlo segun sea conveniente
         if($entrada == null)
             return null;
 
-        $fechaActual = date('Y-m-d');
-        $horaActual = date('H:i:s');
-
-
-
-        $entrada->hora_salida = $fechaActual . ' ' . $horaActual;
-        $diff = date_diff(date_create($entrada->hora_entrada), date_create($entrada->hora_salida));
-        $entrada->horas_realizadas = $diff->h + ($diff->i / 60);
+        #region FACTORIZADO Settear hora de salida y horas realizadas
+        $entrada = self::SetHorasSalidaYHorasRealizadas($entrada);
+        #endregion
 
         return $entrada;
     }
 
     public static function GetEntradasRegistradasDia($id_usuario) {
-
+        #region N/A Obtener entradas del dia de hoy
         $entradas = self::$entradaRepository->findByUsuarioAndHoraEntradaProgramada($id_usuario, Carbon::today());
-        
-        $cant_entradas = count($entradas);
+        #endregion
+
+        if ($entradas === null)
+            $cant_entradas = 0;
+        else
+            $cant_entradas = count($entradas);
 
         return $cant_entradas;
     }
@@ -60,7 +58,7 @@ class EntradaHelpers {
     public static function BuildEntradaDefault($id_usuario){
         // Instancia una entrada con los datos basicos necesarios, su hora de entrada y las potenciales horas que debio de hacer
         $entrada = self::$entradaRepository->getEntradaModel();
-        $turnoDiario = self::GetTurnosDiarios($id_usuario);
+        $turnoDiario = self::GetTurnosDiariosUsuario($id_usuario);
 
         if(count($turnoDiario) == 0)
             return null;
@@ -78,7 +76,7 @@ class EntradaHelpers {
             Log::info('Analizando multiturno con hora de entrada en: '.$turnoDiario->hora_entrada);
         }
 
-       $entrada = self::SetHorasEntrada($entrada, $turnoDiario);
+        $entrada = self::SetHorasEntrada($entrada, $turnoDiario);
 
         $entrada->reporte_diario = '';
         $entrada->id_usuario = $id_usuario;
@@ -86,18 +84,13 @@ class EntradaHelpers {
         return $entrada;
     }
 
-
-
     public static function DetermineStatusAfterEndOfDay($id_usuario){
 
         Log::info('[CIERRE DE HORAS] Analizando entradas de usuario con id: '.$id_usuario);
         $entrada = self::GetEntradaActiva($id_usuario);
-        $turnosDiarios = self::GetTurnosDiarios($id_usuario);
+        $turnosDiarios = self::GetTurnosDiariosUsuario($id_usuario);
 
-
-        if($entrada == null){  // Caso en el que no hay entradas activas
-           
-           
+        if($entrada == null){  // Caso en el que no hay entradas activas           
 
            $entrada = self::BuildEntradaDefault($id_usuario);
            if($entrada == null)  // Este caso es cuando el usuario no tiene turnos
@@ -109,57 +102,16 @@ class EntradaHelpers {
             if(self::GetEntradasRegistradasDia($id_usuario) == count($turnosDiarios))
                 return;
             
-
-            
            $entrada->hora_salida = $entrada->hora_entrada;
         }
 
+        #region FACTORIZADO Settear Status y Ajustar Horas Realizadas
+        $entrada = self::SetStatusAjustarHorasRealizadas($entrada, StatusType::NO_MARCO_SALIDA);
+        #endregion
 
-
-        if ($entrada->horas_realizadas < $entrada->horas_realizadas_programada &&
-            ($entrada->horas_realizadas + self::$toleranceRangeCheckout) >= $entrada->horas_realizadas_programada){
-                $entrada->horas_realizadas = $entrada->horas_realizadas_programada;
-        }
-
-        if ($entrada->horas_realizadas == 0) { $entrada->id_status = StatusType::NO_CUMPLIO_ENTRADA; }
-        elseif ($entrada->horas_realizadas < $entrada->horas_realizadas_programada) { $entrada->id_status = StatusType::CUMPLIO_ENTRADA_INCOMPLETA; }
-        else {
-
-            //Obtenemos la suma de las horas realizadas y las horas programadas (excluyendo la entrada del dia actual)
-            $suma_horas_realizadas = self::$entradaRepository->getHorasRealizadasByUsuario($id_usuario);
-            $suma_horas_realizadas_programadas = self::$entradaRepository->getHorasRealizadasProgramadaByUsuario($id_usuario);
-
-            //Revisamos si la persona tiene permiso para reponer horas (revisando la suma de "horas realizadas" con la suma de "horas realizadas programadas")
-            if ($suma_horas_realizadas >= $suma_horas_realizadas_programadas){
-                //Si no tiene permiso entra en este caso
-
-
-                if ($entrada->horas_realizadas > ($entrada->horas_realizadas_programada + self::$toleranceRangeOverTime)){
-                    //Si la persona cerro 30 minutos tarde, marcaremos su status como que cerro tarde
-                    $entrada->id_status = StatusType::NO_MARCO_SALIDA;
-                }
-                else{
-                    $entrada->id_status = StatusType::CUMPLIO_ENTRADA;
-                }
-
-                //Setteamos las horas realizadas como las programadas, por si se llegaba a sobrepasar, para que no lo haga
-                $entrada->horas_realizadas = $entrada->horas_realizadas_programada;
-            }
-            else if ( ($suma_horas_realizadas + $entrada->horas_realizadas) > ($suma_horas_realizadas_programadas + $entrada->horas_realizadas_programada)){
-                //Si tiene permiso para reponer horas, pero hizo demasiadas horas, solo le daremos las horas que le faltaban por hacer
-
-                $entrada->horas_realizadas = ($suma_horas_realizadas_programadas - $suma_horas_realizadas) + $entrada->horas_realizadas_programada;
-                $entrada->id_status = StatusType::CUMPLIO_ENTRADA;
-            }
-            else{
-                //Si no cumplió ningún caso, settearemos como que cumplió correctamente la entrada
-                $entrada->id_status = StatusType::CUMPLIO_ENTRADA;
-            }
-
-
-        }
-        
         self::$entradaRepository->save($entrada);
+        
+
 
         // Buscar todas las posibles entradas que puede haber despues de la ultima activa y setearles su hora programada asi como la hora de salida la cual es la del cierre
 
@@ -184,7 +136,8 @@ class EntradaHelpers {
 
     }
 
-    public static function GetTurnosDiarios($id_usuario) {
+    public static function GetTurnosDiariosUsuario($id_usuario) {
+        #region FINAL Obtener dia de la semana, horario del alumno y turnos diarios
         $diaActual = date('l');
         switch ($diaActual) {
             case 'Monday':
@@ -202,35 +155,138 @@ class EntradaHelpers {
             case 'Friday':
                 $diaActual = DiasEnum::VIERNES;
                 break;
+            case 'Saturday':
+                $diaActual = DiasEnum::SABADO;
+                break;
+            case 'Sunday':
+                $diaActual = DiasEnum::DOMINGO;
+                break;
             default:
-                $diaActual = 0;
+                throw new CustomException("Error al calcular el dáa de la semana");
                 break;
         }
 
         $horarios = self::$horarioRepository->find(['id_usuario' => $id_usuario]);
-
+        
         if($horarios != null)
             $turnosDiarios = self::$turnoDiarioRepository->findByHorarioAndDia($horarios[0]->id, $diaActual);
         else 
             $turnosDiarios = [];
+        #endregion
 
         return $turnosDiarios;
     }
 
     private static function SetHorasEntrada($entrada, $turnoDiario){
-        $fechaActual = date('Y-m-d');
-        $horaActual = date('H:i:s');
+        $result_entrada = $entrada;
 
-        $entrada->hora_entrada_programada = $fechaActual . ' ' . $turnoDiario->hora_entrada;
-        $entrada->hora_salida_programada = $fechaActual . ' ' . $turnoDiario->hora_salida;
+        $fechaActual = self::getFechaActual();
+        $horaActual = self::getHoraActual();
 
-        $diff = date_diff(date_create($turnoDiario->hora_entrada), date_create($turnoDiario->hora_salida));
-        $entrada->horas_realizadas_programada = $diff->h + ($diff->i / 60);
-
-        $entrada->hora_entrada = $fechaActual . ' ' . $horaActual;
+        $entrada->hora_entrada = self::getTimestamp($fechaActual, $horaActual);
         $entrada->horas_realizadas = 0;
 
-        return $entrada;
+        $entrada->hora_entrada_programada = self::getTimestamp($fechaActual, $turnoDiario->hora_entrada);
+        $entrada->hora_salida_programada = self::getTimestamp($fechaActual, $turnoDiario->hora_salida);
+
+        $entrada->horas_realizadas_programada = self::getDiffHoras($turnoDiario->hora_entrada, $turnoDiario->hora_salida);
+
+        //Validar que solo editamos los atributos que queremos
+        $result_entrada->hora_entrada = $entrada->hora_entrada;
+        $result_entrada->horas_realizadas = $entrada->horas_realizadas;
+        $result_entrada->hora_entrada_programada = $entrada->hora_entrada_programada;
+        $result_entrada->horas_realizadas_programada = $entrada->horas_realizadas_programada;
+
+        return $result_entrada;
+    }
+
+    public static function SetHorasSalidaYHorasRealizadas($entrada){
+        $result_entrada = $entrada;
+        #region FINAL Settear hora de salida y horas realizadas
+        $fechaActual = self::getFechaActual();
+        $horaActual = self::getHoraActual();
+
+        $entrada->hora_salida = self::getTimestamp($fechaActual, $horaActual);
+        $entrada->horas_realizadas = self::getDiffHoras($entrada->hora_entrada, $entrada->hora_salida);
+
+        //Validar que solo editamos los atributos que queremos
+        $result_entrada->hora_salida = $entrada->hora_salida;
+        $result_entrada->horas_realizadas = $entrada->horas_realizadas;
+
+        return $result_entrada;
+        #endregion
+    }
+
+    public static function SetStatusAjustarHorasRealizadas($entrada, $satus_si_cerro_tarde){
+        #region FINAL Settear Status y Ajustar Horas Realizadas
+        $result_entrada = $entrada;
+
+        //TODO: EL "toleranceRangeCheckout" Y EL "toleranceRangeOverTime" DEBERIAN SER PARAMETROS?
+        if ($entrada->horas_realizadas < $entrada->horas_realizadas_programada &&
+            ($entrada->horas_realizadas + self::$toleranceRangeCheckout) >= $entrada->horas_realizadas_programada){
+                $entrada->horas_realizadas = $entrada->horas_realizadas_programada;
+        }
+
+        if ($entrada->horas_realizadas == 0) { $entrada->id_status = StatusType::NO_CUMPLIO_ENTRADA; }
+        elseif ($entrada->horas_realizadas < $entrada->horas_realizadas_programada) { $entrada->id_status = StatusType::CUMPLIO_ENTRADA_INCOMPLETA; }
+        else {
+
+            //Obtenemos la suma de las horas realizadas y las horas programadas (excluyendo la entrada del dia actual)
+            $suma_horas_realizadas = self::$entradaRepository->getHorasRealizadasByUsuario($entrada->id_usuario);
+            $suma_horas_realizadas_programadas = self::$entradaRepository->getHorasRealizadasProgramadaByUsuario($entrada->id_usuario);
+
+            //Revisamos si la persona tiene permiso para reponer horas (revisando la suma de "horas realizadas" con la suma de "horas realizadas programadas")
+            if ($suma_horas_realizadas >= $suma_horas_realizadas_programadas){
+                //Si no tiene permiso entra en este caso
+
+
+                if ($entrada->horas_realizadas > ($entrada->horas_realizadas_programada + self::$toleranceRangeOverTime)){
+                    //Si la persona cerro N minutos tarde, marcaremos su status segun el segundo parametro enviado
+                    $entrada->id_status = $satus_si_cerro_tarde; //StatusType::NO_MARCO_SALIDA;
+                }
+                else{
+                    $entrada->id_status = StatusType::CUMPLIO_ENTRADA;
+                }
+
+                //Setteamos las horas realizadas como las programadas, por si se llegaba a sobrepasar, para que no lo haga
+                $entrada->horas_realizadas = $entrada->horas_realizadas_programada;
+            }
+            else if ( ($suma_horas_realizadas + $entrada->horas_realizadas) > ($suma_horas_realizadas_programadas + $entrada->horas_realizadas_programada)){
+                //Si tiene permiso para reponer horas, pero hizo demasiadas horas, solo le daremos las horas que le faltaban por hacer
+
+                $entrada->horas_realizadas = ($suma_horas_realizadas_programadas - $suma_horas_realizadas) + $entrada->horas_realizadas_programada;
+                $entrada->id_status = StatusType::CUMPLIO_ENTRADA;
+            }
+            else{
+                //Si no cumplió ningún caso, settearemos como que cumplió correctamente la entrada
+                $entrada->id_status = StatusType::CUMPLIO_ENTRADA;
+            }
+        }
+
+        //Validar que solo editamos los atributos que queremos
+        $result_entrada->id_status = $entrada->id_status;
+        $result_entrada->horas_realizadas = $entrada->horas_realizadas;
+
+        return $result_entrada;
+        #endregion
+    }
+
+    private static function getTimestamp($fecha, $hora){
+        return $fecha . ' ' . $hora;
+    }
+    
+    private static function getDiffHoras($hora_inicio, $hora_fin){
+        $diff = date_diff(date_create($hora_inicio), date_create($hora_fin));
+        $diffHoras = ($diff->d * 24) + $diff->h + ($diff->i / 60);
+        return $diffHoras;
+    }
+    
+    private static function getFechaActual(){
+        return date('Y-m-d');
+    }
+    
+    private static function getHoraActual(){
+        return date('H:i:s');
     }
 
 }

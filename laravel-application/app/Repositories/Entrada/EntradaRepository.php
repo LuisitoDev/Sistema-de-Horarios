@@ -71,10 +71,10 @@ class EntradaRepository{
 
     public function findByUsuarioAndHoraEntrada($id_usuario, $date)
     {
+        //TODO: IMPLEMENTAR MAP?
         return Entrada::query()
             ->where(Entrada::id_usuario, $id_usuario)
-            ->whereDate(Entrada::hora_entrada, $date)->get()
-            ->map->format();
+            ->whereDate(Entrada::hora_entrada, $date)->get();
     }
 
     public function getHorasRealizadasByUsuario($id_usuario)

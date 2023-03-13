@@ -9,4 +9,6 @@ abstract class DiasEnum
     const MIERCOLES = 3;
     const JUEVES = 4;
     const VIERNES = 5;
+    const SABADO = 6;
+    const DOMINGO = 7;
 }

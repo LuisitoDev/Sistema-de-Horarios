@@ -11,7 +11,9 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToArray;
 use App\Exceptions\CustomException;
+use App\Helpers\EntradaHelpers;
 use App\Http\Controllers\Alumno\CargaHoras\EntradaController;
+use App\Repositories\Entrada\EntradaRepository;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
@@ -23,14 +25,17 @@ class UsuariosEntradasImport implements ToCollection, WithHeadingRow, WithBatchI
 {
 
     private $arrayUsers = [];
+    private $entradaRepository;
 
-    public function __construct()
+    public function __construct(
+        EntradaRepository $entradaRepository)
     {
+        $this->entradaRepository = $entradaRepository;
     }
 
     public function collection(Collection $rows)
     {
-        $entradas = [];
+        $entrada = $this->entradaRepository->getEntradaModel();
 
         foreach ($rows as $row)
         {
@@ -58,79 +63,32 @@ class UsuariosEntradasImport implements ToCollection, WithHeadingRow, WithBatchI
             if ($user === null)
                 throw new CustomException("Correo del Usuario \"". $email . "\" no encontrado al importar sus entradas", 404);
 
-            $hora_inicio_turno = $row['hora_inicio_turno'];
-            $hora_finalizacion_turno = $row['hora_finalizacion_turno'];
-
-            $hora_entrada = $row['hora_entrada'];
-            $hora_salida = $row['hora_salida'];
-
-            if ($hora_inicio_turno === null)
+            if ($row['hora_inicio_turno'] === null)
                 // throw new CustomException("La hora de inicio de turno del usuario con correo: ". $email . " es nula ", 403);
                 continue;
-
-            if ($hora_finalizacion_turno === null)
+            
+            if ($row['hora_finalizacion_turno'] === null)
                 // throw new CustomException("La hora de fin de turno del usuario con correo: ". $email . " es nula ", 403);
                 continue;
+            
+            //TODO: PENDIENTE TESTEAR
+            $entrada->hora_entrada_programada = $this->convertExcelDateToDate($row['hora_inicio_turno']);
+            $entrada->hora_salida_programada = $this->convertExcelDateToDate($row['hora_finalizacion_turno']);
 
-            $horas_realizadas =  round($row['horas_trabajadas'], 3);
-            $horas_realizadas_programada = round($row['horas_programadas'], 3);
+            $entrada->hora_entrada = $this->convertExcelDateToDate($row['hora_entrada']);
+            $entrada->hora_salida = $this->convertExcelDateToDate($row['hora_salida']);
 
-            $id_status = null;
+            $entrada->horas_realizadas =  round($row['horas_trabajadas'], 3);
+            $entrada->horas_realizadas_programada = round($row['horas_programadas'], 3);
 
-            //TODO: ESTE CODIGO ESTA REPETIDO CON EL ARCHIVO "EntradaController::RegistarHoraSalida"
-            //Si la persona cerro un poco antes su entrada, pero entra dentro del rango de tolerancia aceptado, le damos sus horas completas
-            if ($horas_realizadas < $horas_realizadas_programada &&
-            ($horas_realizadas + EntradaController::$toleranceRangeCheckout) >= $horas_realizadas_programada){
-                $horas_realizadas = $horas_realizadas_programada;
-            }
+            #region FACTORIZADO Settear Status y Ajustar Horas Realizadas
+            $entrada = EntradaHelpers::SetStatusAjustarHorasRealizadas($entrada, StatusType::CERRO_TARDE);
+            #endregion
 
-            if ($horas_realizadas == 0) { $id_status = StatusType::NO_CUMPLIO_ENTRADA; }
-            elseif ($horas_realizadas < $horas_realizadas_programada) { $id_status = StatusType::CUMPLIO_ENTRADA_INCOMPLETA; }
-            else {
+            $entrada->id_usuario = $user->id;
+            $entrada->reporte_diario = "";
 
-                //Obtenemos la suma de las horas realizadas y las horas programadas (excluyendo la entrada del dia actual)
-                $suma_horas_realizadas = Entrada::where([['id_usuario', "=", $user->id], ['id_status', "!=", StatusType::TRABAJANDO]])->sum('horas_realizadas');
-                $suma_horas_realizadas_programadas = Entrada::where([['id_usuario', "=", $user->id], ['id_status', "!=", StatusType::TRABAJANDO]])->sum('horas_realizadas_programada');
-
-                //Revisamos si la persona tiene permiso para reponer horas (revisando la suma de "horas realizadas" con la suma de "horas realizadas programadas")
-                if ($suma_horas_realizadas >= $suma_horas_realizadas_programadas){
-                    //Si no tiene permiso entra en este caso
-
-                    if ($horas_realizadas > ($horas_realizadas_programada + EntradaController::$toleranceRangeOverTime)){
-                        //Si la persona cerro 30 minutos tarde, marcaremos su status como que cerro tarde
-                        $id_status = StatusType::CERRO_TARDE;
-                    }
-                    else{
-                        $id_status = StatusType::CUMPLIO_ENTRADA;
-                    }
-
-                    //Setteamos las horas realizadas como las programadas, por si se llegaba a sobrepasar, para que no lo haga
-                    $horas_realizadas = $horas_realizadas_programada;
-                }
-                else if ( ($suma_horas_realizadas + $horas_realizadas) > ($suma_horas_realizadas_programadas + $horas_realizadas_programada)){
-                    //Si tiene permiso para reponer horas, pero hizo demasiadas horas, solo le daremos las horas que le faltaban por hacer
-
-                    $horas_realizadas = ($suma_horas_realizadas_programadas - $suma_horas_realizadas) + $horas_realizadas_programada;
-                    $id_status = StatusType::CUMPLIO_ENTRADA;
-                }
-                else{
-                    //Si no cumplió ningún caso, settearemos como que cumplió correctamente la entrada
-                    $id_status = StatusType::CUMPLIO_ENTRADA;
-                }
-            }
-
-            Entrada::create([
-                'hora_entrada_programada' => $this->convertExcelDateToDate($hora_inicio_turno),
-                'hora_salida_programada' => $this->convertExcelDateToDate($hora_finalizacion_turno),
-                'horas_realizadas_programada' => $horas_realizadas_programada,
-                'hora_entrada' => $this->convertExcelDateToDate($hora_entrada),
-                'hora_salida' => $this->convertExcelDateToDate($hora_salida),
-                'horas_realizadas' => $horas_realizadas,
-                'reporte_diario' => '',
-                'id_status' => $id_status,
-                'id_usuario' => $user->id
-            ]);
-
+            $resultado = $this->entradaRepository->save($entrada);
         }
 
     }
