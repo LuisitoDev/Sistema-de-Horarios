@@ -4,10 +4,10 @@
 namespace App\Imports;
 
 use App\Enums\DiasEnum;
-use App\Models\Usuario;
-use App\Models\Horario;
-use App\Models\TurnoDiario;
 use App\Exceptions\CustomException;
+use App\Repositories\Horario\HorarioRepository;
+use App\Repositories\TurnoDiario\TurnoDiarioRepository;
+use App\Repositories\Usuario\UsuarioRepository;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -19,9 +19,15 @@ use PhpParser\Node\Stmt\Break_;
 class HorariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, WithChunkReading
 {
     private $arrayUsers = [];
+    private $usuarioRepository;
+    private $horarioRepository;
+    private $turnoDiarioRepository;
 
     public function __construct()
     {
+        $this->usuarioRepository = new UsuarioRepository;
+        $this->horarioRepository = new HorarioRepository;
+        $this->turnoDiarioRepository = new TurnoDiarioRepository;
     }
 
     public function collection(Collection $rows)
@@ -38,7 +44,7 @@ class HorariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, 
             $userFound = $this->findUserByEmail($email);
 
             if ($userFound === false){
-                $user = Usuario::firstWhere('correo_universitario', $email);
+                $user = $this->usuarioRepository->findByCorreo($email);
 
                 if ($user !== null)
                     array_push($this->arrayUsers, $user);
@@ -51,15 +57,13 @@ class HorariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, 
 
 
             $id_horario = 0;
-            $horario = Horario::firstWhere('id_usuario', $user->id);
+            $horario = $this->horarioRepository->getByUsuario($user->id);
 
             if ($horario !== null){
                 $id_horario = $horario->id;
             }
             else{
-                $horario_subido = Horario::create([
-                    'id_usuario' => $user->id
-                ]);
+                $horario_subido = $this->horarioRepository->create($user->id);
 
                 $id_horario = $horario_subido->id;
             }
@@ -73,12 +77,7 @@ class HorariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, 
 
                 $this->checkTurnBlocked($email, $id_horario, $lunes_entrada, $lunes_salida, DiasEnum::LUNES);
 
-                TurnoDiario::create([
-                    'hora_entrada'          => $lunes_entrada,
-                    'hora_salida'           => $lunes_salida,
-                    'dia' => DiasEnum::LUNES,
-                    'id_horario' => $id_horario,
-                ]);
+                $this->turnoDiarioRepository->create($lunes_entrada, $lunes_salida, DiasEnum::LUNES, $id_horario);
             }
 
             $martes_entrada = $row['martes_entrada'];
@@ -87,12 +86,7 @@ class HorariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, 
 
                 $this->checkTurnBlocked($email, $id_horario, $martes_entrada, $martes_salida, DiasEnum::MARTES);
 
-                TurnoDiario::create([
-                    'hora_entrada'          => $martes_entrada,
-                    'hora_salida'           => $martes_salida,
-                    'dia' => DiasEnum::MARTES,
-                    'id_horario' => $id_horario,
-                ]);
+                $this->turnoDiarioRepository->create($martes_entrada, $martes_salida, DiasEnum::MARTES, $id_horario);
             }
 
             $miercoles_entrada = $row['miercoles_entrada'];
@@ -101,12 +95,7 @@ class HorariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, 
 
                 $this->checkTurnBlocked($email, $id_horario, $miercoles_entrada, $miercoles_salida, DiasEnum::MIERCOLES);
 
-                TurnoDiario::create([
-                    'hora_entrada'          => $miercoles_entrada,
-                    'hora_salida'           => $miercoles_salida,
-                    'dia' => DiasEnum::MIERCOLES,
-                    'id_horario' => $id_horario,
-                ]);
+                $this->turnoDiarioRepository->create($miercoles_entrada, $miercoles_salida, DiasEnum::MIERCOLES, $id_horario);
             }
 
             $jueves_entrada = $row['jueves_entrada'];
@@ -115,12 +104,7 @@ class HorariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, 
 
                 $this->checkTurnBlocked($email, $id_horario, $jueves_entrada, $jueves_salida, DiasEnum::JUEVES);
 
-                TurnoDiario::create([
-                    'hora_entrada'          => $jueves_entrada,
-                    'hora_salida'           => $jueves_salida,
-                    'dia' => DiasEnum::JUEVES,
-                    'id_horario' => $id_horario,
-                ]);
+                $this->turnoDiarioRepository->create($jueves_entrada, $jueves_salida, DiasEnum::JUEVES, $id_horario);
             }
 
             $viernes_entrada = $row['viernes_entrada'];
@@ -129,12 +113,7 @@ class HorariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, 
 
                 $this->checkTurnBlocked($email, $id_horario, $viernes_entrada, $viernes_salida, DiasEnum::VIERNES);
 
-                TurnoDiario::create([
-                    'hora_entrada'          => $viernes_entrada,
-                    'hora_salida'           => $viernes_salida,
-                    'dia' => DiasEnum::VIERNES,
-                    'id_horario' => $id_horario,
-                ]);
+                $this->turnoDiarioRepository->create($viernes_entrada, $viernes_salida, DiasEnum::VIERNES, $id_horario);
             }
         }
     }
@@ -200,12 +179,7 @@ class HorariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, 
             throw new CustomException("El turno del dia ".$dia_nombre." de ". $hora_entrada ."-". $hora_salida ." del usuario con correo: ". $email . " no es valido", 403);
 
 
-        $turnoBloqueado = TurnoDiario::
-                whereRaw("((hora_entrada < CAST(? AS time) AND hora_salida > CAST(? AS time)) or (hora_entrada < CAST(? AS time) AND hora_salida > CAST(? AS time)) or (hora_entrada >= CAST(? AS time) AND hora_salida <= CAST(? AS time)))",
-                [$hora_entrada,$hora_entrada,$hora_salida,$hora_salida,$hora_entrada,$hora_salida] )->
-                where("dia", "=", $dia_turno)->
-                where("id_horario", "=", $id_horario)->
-                first();
+        $turnoBloqueado = $this->turnoDiarioRepository->checkTurnoBloqueado($hora_entrada, $hora_salida, $dia_turno, $id_horario); 
 
         if ($turnoBloqueado !== null)
             throw new CustomException("El turno del dia ".$dia_nombre." de ". $hora_entrada ."-". $hora_salida ." del usuario con correo: ". $email . " está bloqueado por otro turno", 403);

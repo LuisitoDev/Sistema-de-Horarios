@@ -23,4 +23,13 @@ class CicloEscolarRepository{
         return count($cicloEscolar) > 0 ? $cicloEscolar->map->format()[0] : null;
     }
 
+    public function findLast()
+    {
+       $cicloEscolar = CicloEscolar::query()
+        ->orderBy('fecha_ingreso', 'DESC')
+        ->get()->take(1);
+        
+        return count($cicloEscolar) > 0 ? $cicloEscolar->map->format()[0] : null;
+    }
+
 }

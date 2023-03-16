@@ -21,6 +21,11 @@ class UsuarioRepository{
         return $usuario->save();
     } 
 
+    public function getUsuarioModel()
+    {
+        return new Usuario();
+    }
+
     public function findByDateWithTrashed($date)
     {
         return Usuario::whereDate(Usuario::created_at, '<=', $date)
@@ -43,6 +48,20 @@ class UsuarioRepository{
 
         return count($usuario) > 0 ? $usuario->map->format()[0] : null;
     }
+
+    public function findByCorreo($correo_universitario, $caseSensitive = true)
+    {
+        $query = Usuario::query();
+
+        if ($caseSensitive)
+            $query->where(Usuario::correo_universitario, $correo_universitario);
+        else
+            $query->where(DB::raw('lower('.Usuario::correo_universitario.')'), 'like', '%' . strtolower($correo_universitario) . '%');
+            
+        $usuario = $query->get()->take(1);
+
+        return count($usuario) > 0 ? $usuario->map->format()[0] : null;
+    }
     
     public function findByFieldBetweenDates($search, $dayFrom, $dayTo, $page = null, $elements = null)
     {
@@ -56,11 +75,22 @@ class UsuarioRepository{
 
         if ($dayFrom != null && $dayTo != null){
             $query->where(function ($query) use ($dayFrom, $dayTo) {
-                $query->whereRaw(
-                    "(ciclo_escolar.fecha_ingreso <= ? && ciclo_escolar.fecha_salida >= ?)
-                    OR  (ciclo_escolar.fecha_ingreso <= ? && ciclo_escolar.fecha_salida >= ?)
-                    OR  (ciclo_escolar.fecha_ingreso >= ? && ciclo_escolar.fecha_salida <= ?)",
-                    [$dayFrom, $dayFrom, $dayTo, $dayTo, $dayFrom, $dayTo]);
+
+                $query->where(function ($query) use ($dayFrom) {
+                    $query->whereRaw(
+                        "ciclo_escolar.fecha_ingreso <= ? && ciclo_escolar.fecha_salida >= ?",
+                        [$dayFrom, $dayFrom] );
+                })
+                ->orWhere(function ($query) use ($dayTo) {
+                    $query->whereRaw(
+                        "ciclo_escolar.fecha_ingreso <= ? && ciclo_escolar.fecha_salida >= ?",
+                        [$dayTo,$dayTo] );
+                })
+                ->orWhere(function ($query) use ($dayFrom, $dayTo) {
+                    $query->whereRaw(
+                        "ciclo_escolar.fecha_ingreso >= ? && ciclo_escolar.fecha_salida <= ?",
+                        [$dayFrom,$dayTo] );
+                });
             });
         }
 

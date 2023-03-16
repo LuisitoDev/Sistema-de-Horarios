@@ -3,9 +3,6 @@
 
 namespace App\Imports;
 
-use App\Models\Entrada;
-use App\Models\Usuario;
-
 use App\Enums\StatusType;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Collection;
@@ -14,6 +11,7 @@ use App\Exceptions\CustomException;
 use App\Helpers\EntradaHelpers;
 use App\Http\Controllers\Alumno\CargaHoras\EntradaController;
 use App\Repositories\Entrada\EntradaRepository;
+use App\Repositories\Usuario\UsuarioRepository;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
@@ -26,11 +24,12 @@ class UsuariosEntradasImport implements ToCollection, WithHeadingRow, WithBatchI
 
     private $arrayUsers = [];
     private $entradaRepository;
+    private $usuarioRepository;
 
-    public function __construct(
-        EntradaRepository $entradaRepository)
+    public function __construct()
     {
-        $this->entradaRepository = $entradaRepository;
+        $this->entradaRepository = new EntradaRepository;
+        $this->usuarioRepository = new UsuarioRepository;
     }
 
     public function collection(Collection $rows)
@@ -52,7 +51,7 @@ class UsuariosEntradasImport implements ToCollection, WithHeadingRow, WithBatchI
             $userFound = $this->findUserByEmail($email);
 
             if ($userFound === false){
-                $user = Usuario::where(DB::raw('lower(correo_universitario)'), 'like', '%' . strtolower($email) . '%')->first();
+                $user = $this->usuarioRepository->findByCorreo($email, false);
 
                 if ($user !== null)
                     array_push($this->arrayUsers, $user);

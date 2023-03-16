@@ -15,4 +15,7 @@ class ServicioRepository{
         })->sum(Servicio::horas_totales);
     }
 
+    public function pluckByIdNombre(){
+        return Servicio::pluck('id', 'nombre');
+    }
 }

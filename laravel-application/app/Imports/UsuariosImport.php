@@ -3,14 +3,13 @@
 
 namespace App\Imports;
 
-use App\Enums\DiasEnum;
-use App\Models\Carrera;
-use App\Models\Programa;
-use App\Models\Servicio;
-use App\Models\Usuario;
-use App\Models\CicloEscolar;
-use App\Models\UsuarioPrograma;
-use App\Models\UsuarioServicio;
+use App\Repositories\Admin\CarreraRepository;
+use App\Repositories\Admin\ProgramaRepository;
+use App\Repositories\CicloEscolar\CicloEscolarRepository;
+use App\Repositories\Servicio\ServicioRepository;
+use App\Repositories\Usuario\UsuarioRepository;
+use App\Repositories\UsuarioPrograma\UsuarioProgramaRepository;
+use App\Repositories\UsuarioServicio\UsuarioServicioRepository;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -29,32 +28,53 @@ class UsuariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, 
     private $programas;
     private $ciclo_escolar;
 
+
+    private $usuarioRepository;
+    private $programaRepository;
+    private $carreraRepository;
+    private $servicioRepository;
+    private $cicloEscolarRepository;
+    private $usuarioServicioRepository;
+    private $usuarioProgramaRepository;
+
     public function __construct()
     {
-        $this->carreras = Carrera::pluck('id', 'abreviacion');
-        $this->servicios = Servicio::pluck('id', 'nombre');
-        $this->programas = Programa::pluck('id', 'nombre');
-        $this->ciclo_escolar = CicloEscolar::orderBy('fecha_ingreso', 'DESC')->first();
+        $this->usuarioRepository = new UsuarioRepository;
+        $this->programaRepository = new ProgramaRepository;
+        $this->carreraRepository = new CarreraRepository;
+        $this->servicioRepository = new ServicioRepository;
+        $this->cicloEscolarRepository = new CicloEscolarRepository;
+        $this->usuarioServicioRepository = new UsuarioServicioRepository;
+        $this->usuarioProgramaRepository = new UsuarioProgramaRepository;
+
+        $this->carreras = $this->carreraRepository->pluckByIdAbreviacion();
+        $this->servicios = $this->servicioRepository->pluckByIdNombre();
+        $this->programas = $this->programaRepository->pluckByIdNombre();
+        $this->ciclo_escolar = $this->cicloEscolarRepository->findLast();
     }
 
     public function collection(Collection $rows)
     {
         foreach ($rows as $row)
         {
-            $usuario_actual = Usuario::select('*')->where('correo_universitario', $row['correo_uanl'])->first();
+            $usuario_actual = $this->usuarioRepository->findByCorreo($row['correo_uanl']);
             $id_usuario = null;
 
             if ($usuario_actual == null){
-                $usuario_subido = Usuario::create([
-                    'nombre'                => $row['nombre_asesor'],
-                    'apellido_pat'          => $row['apellido_paterno'],
-                    'apellido_mat'          => $row['apellido_materno'],
-                    'matricula'             => $row['matricula'],
-                    'correo_universitario'  => $row['correo_uanl'],
-                    'id_carrera'            => $this->carreras[$row['carrera']],
-                    'id_ciclo_escolar'      => $this->ciclo_escolar->id,
-                    'id_rotacion'           => $row['id_rotacion'],
-                ]);
+                
+                $usuario_subido = $this->usuarioRepository->getUsuarioModel();
+
+                $usuario_subido->nombre = $row['nombre_asesor'];
+                $usuario_subido->apellido_pat = $row['apellido_paterno'];
+                $usuario_subido->apellido_mat = $row['apellido_materno'];
+                $usuario_subido->matricula = $row['matricula'];
+                $usuario_subido->correo_universitario = $row['correo_uanl'];
+                $usuario_subido->id_carrera = $this->carreras[$row['carrera']];
+                $usuario_subido->id_ciclo_escolar = $this->ciclo_escolar->id;
+                $usuario_subido->id_rotacion = $row['id_rotacion'];
+
+                //TODO: ESTO RETORNA EL ID?
+                $usuario_subido = $this->usuarioRepository->save($usuario_subido);
 
                 $id_usuario = $usuario_subido->id;
             }
@@ -62,35 +82,23 @@ class UsuariosImport implements ToCollection, WithHeadingRow, WithBatchInserts, 
                 $id_usuario = $usuario_actual->id;
             }
 
-            $usuario_servicio = UsuarioServicio::select('*')->where('id_usuario', $id_usuario)->first();
+            $usuario_servicio = $this->usuarioServicioRepository->getByUsuario($id_usuario);
 
             if ($usuario_servicio == null){
-                UsuarioServicio::create([
-                    'id_usuario'            => $id_usuario,
-                    'id_servicio'           => $this->servicios[$row['servicio']]
-                ]);
+                $this->usuarioServicioRepository->create($id_usuario, $this->servicios[$row['servicio']]);
             }
             else if ($usuario_servicio->id_servicio !== $this->servicios[$row['servicio']]){
-                UsuarioServicio::create([
-                    'id_usuario'            => $id_usuario,
-                    'id_servicio'           => $this->servicios[$row['servicio']]
-                ]);
+                $this->usuarioServicioRepository->create($id_usuario, $this->servicios[$row['servicio']]);
             }
 
             if ($row['servicio'] == "Servicio Social"){
-                $usuario_programa = UsuarioPrograma::select('*')->where('id_usuario', $id_usuario)->first();
+                $usuario_programa =  $this->usuarioProgramaRepository->getByUsuario($id_usuario);
 
                 if ($usuario_programa == null){
-                    UsuarioPrograma::create([
-                        'id_usuario'            => $id_usuario,
-                        'id_programa'           => $this->programas[$row['programa']]
-                    ]);
+                    $this->usuarioProgramaRepository->create($id_usuario, $this->programas[$row['programa']]);
                 }
                 else if ($usuario_programa->id_programa !== $this->programas[$row['programa']]){
-                    UsuarioPrograma::create([
-                        'id_usuario'            => $id_usuario,
-                        'id_programa'           => $this->programas[$row['programa']]
-                    ]);
+                    $this->usuarioProgramaRepository->create($id_usuario, $this->programas[$row['programa']]);
                 }
 
             }
